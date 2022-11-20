@@ -13,13 +13,24 @@ jobs:
 
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
+      - name: Install python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+
+      - run: poetry bild
+
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
 
-      - name: Installing python
-        uses: actions/setup-python@v4
+      - name: Publish to GH releases
+        uses: softprops/action-gh-release@v1
         with:
-          python-version: '3.9'
-          
+          files: ${{ github.workspace }}/dist/*
+
       - run: echo "🍏 This job's status is ${{ job.status }}."
