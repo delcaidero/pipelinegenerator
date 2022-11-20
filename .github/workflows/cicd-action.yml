@@ -22,7 +22,7 @@ jobs:
       - name: Install poetry
         uses: snok/install-poetry@v1
 
-      - run: poetry bild
+      - run: poetry build
 
       - name: List files in the repository
         run: |
@@ -32,5 +32,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ github.workspace }}/dist/*
+          name: nombre
+          tag_name: etiqueta
 
       - run: echo "🍏 This job's status is ${{ job.status }}."
