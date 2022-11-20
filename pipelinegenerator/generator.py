@@ -6,20 +6,15 @@ Este módulo permite generar pipelines para un dataset cualquiera.
 """
 
 import pickle
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
+import numpy as np
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
-from random import randint
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
 
-#def make_pipeline(use_pca=True, components=3, num_var=[], cat_var=[]):
-def make_pipeline():
+def make_pipeline(use_pca: bool =False, components: int =0, num_var: list=[], cat_var: list=[]):
     """
     Generador de pipelines
 
@@ -32,44 +27,51 @@ def make_pipeline():
 
     Examples:
     ---------
-
-    >>> from pipelinegenerator.generator import make_pipeline
-    >>> pipelinegenerator.generator.make_pipeline(use_pca=True, components=3, num_var=["age"], cat_var=["sex"])
-    1
+    >>> import numpy as np
+    >>> from pipelinegenerator.generator import make_pipeline, fit, export_pipeline
+    >>> from sklearn.datasets import fetch_openml
+    >>> from sklearn.model_selection import train_test_split
+    >>> from sklearn.tree import DecisionTreeClassifier
+    >>> # Crear el pipeline
+    >>> generated_pipeline = make_pipeline(use_pca=True, components=3, num_var=["age", "fare", "sibsp", "parch"], cat_var=["pclass", "sex", "embarked"])
+    >>> # carga del dataset
+    >>> X, y = fetch_openml("titanic", version=1, as_frame=True, return_X_y=True)
+    >>> # division train_test
+    >>> X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
+    >>> # Entrenamiento 
+    >>> generated_pipeline = fit(generated_pipeline, X_train, y_train)
+    >>> generated_pipeline.fit_transform(X_test.head(3))
+    array([[0., 0., 1., 1., 1.],
+       [1., 0., 0., 1., 1.],
+       [0., 1., 0., 1., 1.]])
 
     """
 
-    #pipeline de variables numericas incluyendo PCA
-    num_pipeline = Pipeline([("imputer", SimpleImputer()),
-                             ("ss", StandardScaler()),
-                             ("pca", PCA(n_components=2))
-                            ])
+    if use_pca:
+        num_pipeline = Pipeline([
+            ("imputer", SimpleImputer()),
+            ("ss", StandardScaler()),
+            ("pca", PCA(n_components=components))
+        ])
+    else:
+        num_pipeline = Pipeline([
+            ("imputer", SimpleImputer()),
+            ("ss", StandardScaler())
+        ])
 
-    #Column transformer incluyendo las categoricas
     ct = ColumnTransformer([
-        ("cat", OneHotEncoder(), ["pclass", "sex", "embarked"]),
-        ("num", num_pipeline, ["age", "fare", "sibsp", "parch"])
+        ("cat", OneHotEncoder(), cat_var),
+        ("num", num_pipeline, num_var)
     ])
 
-    #pipeline final con modelo
-    # faltaria quitar el modelo >repasar video
     pipeline = Pipeline([
-        ("ct", ct),
-        ("model", DecisionTreeClassifier())
+        ("ct", ct)
     ])
 
-    #valores para la METAESTIMACION
-    #param_grid ={
-    #    "ct__num__pca__n_components": [1,2,3,4],
-    #    "model__max_depth": [2,3,4,5,6,7,8]
-    #}
-
-
-    #return list(df.select_dtypes(include=[np.number]).columns)
     return pipeline
 
 
-def fit(generated_pipeline, X, y):
+def fit(pipeline: Pipeline, X, y):
     """
     Entrenador del pipeline
 
@@ -93,12 +95,12 @@ def fit(generated_pipeline, X, y):
     1
 
     """
-    generated_pipeline.fit(X, y)
-    return generated_pipeline
+    pipeline = pipeline.fit(X, y)
+    return pipeline
 
 
-    def export(pipeline, file):
-        """
+def export_pipeline(pipeline: Pipeline, file: str):
+    """
     Export to a pickle file.
 
     Args:
@@ -109,9 +111,10 @@ def fit(generated_pipeline, X, y):
     Examples:
     ---------
 
-    >>> from pipelinegenerator.export import export
-    >>> export()
+    >>> from pipelinegenerator.export import export_pipeline
+    >>> export_pipeline()
     1
 
     """
-    return 0
+    with open(file, "wb") as f:
+        pickle.dump(pipeline, f)
