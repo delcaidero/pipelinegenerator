@@ -1,6 +1,10 @@
 name: Building
 run-name: ${{ github.actor }} is building pipelinegenerator 🚀
-on: [push]
+on: 
+  push:
+    tags:
+      - "v*.*.*"
+      
 jobs:
   Building:
     runs-on: ubuntu-latest
