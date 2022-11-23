@@ -1,10 +1,4 @@
-# Patron para utilizar como libreria o con 'con python -m pipelinegenerator'
-def load_data():
-    return pd.read_csv(...)
-
-def main():
-    df = load_data()
-    train_model(df)
-
-if __name__ == "__main__":
-    main()
+def help():
+    print(
+        "Paquete de python creado para interiorizar los conceptos del módulo 2 del curso de 'MLOps y Operaciones de Inteligencia Aritificial' realizado por la SPEGC en 2022"
+    )
