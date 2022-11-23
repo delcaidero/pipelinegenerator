@@ -13,6 +13,12 @@ from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
 
 
+def describe():
+    print(
+        "Paquete de python creado para interiorizar los conceptos del módulo 2 del curso de 'MLOps y Operaciones de Inteligencia Aritificial' realizado por la SPEGC en 2022"
+    )
+
+
 def make_pipeline(
     use_pca: bool = False,
     components: int = 0,
