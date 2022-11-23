@@ -1,9 +1,9 @@
 name: Building
 run-name: ${{ github.actor }} is building pipelinegenerator 🚀
-on: [push]
-#  push:
-#    tags:
-#      - "v*.*.*"
+on: #[push]
+  push:
+    tags:
+      - "v*.*.*"
 jobs:
   Building:
     runs-on: ubuntu-latest
@@ -26,8 +26,8 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Poetry testing
-        run: poetry run pytest
+      #- name: Poetry testing
+      #  run: poetry run pytest
 
       - run: poetry build
 

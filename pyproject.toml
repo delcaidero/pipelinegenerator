@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pipelinegenerator"
-version = "0.1.5"
+version = "0.1.6"
 description = ""
 authors = ["alby <alby.mendoza@gmail.com>"]
 readme = "README.md"
