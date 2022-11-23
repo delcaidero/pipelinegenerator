@@ -6,15 +6,20 @@ Este módulo permite generar pipelines para un dataset cualquiera.
 """
 
 import pickle
-import numpy as np
-from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.pipeline import Pipeline  # , make_pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
 
 
-def make_pipeline(use_pca: bool =False, components: int =0, num_var: list=[], cat_var: list=[]):
+def make_pipeline(
+    use_pca: bool = False,
+    components: int = 0,
+    num_var: list[str] = [""],
+    cat_var: list[str] = [""],
+):
+
     """
     Generador de pipelines
 
@@ -33,12 +38,15 @@ def make_pipeline(use_pca: bool =False, components: int =0, num_var: list=[], ca
     >>> from sklearn.model_selection import train_test_split
     >>> from sklearn.tree import DecisionTreeClassifier
     >>> # Crear el pipeline
-    >>> generated_pipeline = make_pipeline(use_pca=True, components=3, num_var=["age", "fare", "sibsp", "parch"], cat_var=["pclass", "sex", "embarked"])
+    >>> generated_pipeline = make_pipeline(use_pca=True,
+    >>>                 components=3,
+    >>>                 num_var=["age", "fare", "sibsp", "parch"],
+    >>>                 cat_var=["pclass", "sex", "embarked"])
     >>> # carga del dataset
     >>> X, y = fetch_openml("titanic", version=1, as_frame=True, return_X_y=True)
     >>> # division train_test
     >>> X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
-    >>> # Entrenamiento 
+    >>> # Entrenamiento
     >>> generated_pipeline = fit(generated_pipeline, X_train, y_train)
     >>> generated_pipeline.fit_transform(X_test.head(3))
     array([[0., 0., 1., 1., 1.],
@@ -48,25 +56,26 @@ def make_pipeline(use_pca: bool =False, components: int =0, num_var: list=[], ca
     """
 
     if use_pca:
-        num_pipeline = Pipeline([
-            ("imputer", SimpleImputer()),
-            ("ss", StandardScaler()),
-            ("pca", PCA(n_components=components))
-        ])
+        num_pipeline = Pipeline(
+            [
+                ("imputer", SimpleImputer()),
+                ("ss", StandardScaler()),
+                ("pca", PCA(n_components=components)),
+            ]
+        )
     else:
-        num_pipeline = Pipeline([
-            ("imputer", SimpleImputer()),
-            ("ss", StandardScaler())
-        ])
+        num_pipeline = Pipeline(
+            [("imputer", SimpleImputer()), ("ss", StandardScaler())]
+        )
 
-    ct = ColumnTransformer([
-        ("cat", OneHotEncoder(), cat_var),
-        ("num", num_pipeline, num_var)
-    ])
+    transformer = ColumnTransformer(
+        [
+            ("cat", OneHotEncoder(), cat_var),
+            ("num", num_pipeline, num_var),
+        ]
+    )
 
-    pipeline = Pipeline([
-        ("ct", ct)
-    ])
+    pipeline = Pipeline([("ct", transformer)])
 
     return pipeline
 
